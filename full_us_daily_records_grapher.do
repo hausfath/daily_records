@@ -1,4 +1,4 @@
-import delimited "/Users/hausfath/Desktop/Climate Science/GHCN Monthly/US_max.csv", clear
+import delimited "/Users/hausfath/Desktop/Climate Science/daily_records/US_max.csv", clear
 
 rename records max
 drop v1
@@ -6,7 +6,7 @@ sort year
 tempfile data
 save "`data'", replace
 
-import delimited "/Users/hausfath/Desktop/Climate Science/GHCN Monthly/US_min.csv", clear
+import delimited "/Users/hausfath/Desktop/Climate Science/daily_records/US_min.csv", clear
 rename records min
 drop v1
 sort year
@@ -15,21 +15,19 @@ merge year using "`data'"
 drop _merge
 
 replace min = min * -1
+drop if year < 1905
 
 
-/*
 #delimit ;
 twoway (bar max year, color(red) lwidth(thin)) 
 	   (bar min year, lwidth(thin) color(blue))
-	   (line max_low year, color(maroon) lwidth(thin))
-	   (line min_low year, color(navy) lwidth(thin)) 
        ,
-  title("CONUS daily minimum and maximum records per year", size(large))
+  title("US daily minimum and maximum records per year", size(large))
   ytitle("Records per year", size(medlarge))
-  caption("Based on Berkeley Earth CONUS gridded daily homogenized data using 272 equal area gridcells", size(small))
+  caption("Based on Berkeley Earth US gridded daily homogenized data using 340 equal area gridcells", size(small))
   xtitle("", size(vsmall))
-  ylabel(-1000 "1000" -500 "500" 0 "0" 500 "500" 1000 "1000", labsize(medium) gmax glcolor(black) glpattern(dot))
-  xlabel(1880(20)2020, labsize(medium))
+  ylabel(-2000 "2k" -1000 "1k" 0 "0" 1000 "1k" 2000 "2k", labsize(medium) gmax glcolor(black) glpattern(dot))
+  xlabel(1900(20)2020, labsize(medium))
   graphregion(color(white) lcolor(ebg))
   xsize(9)
   ysize(5)
@@ -37,7 +35,7 @@ twoway (bar max year, color(red) lwidth(thin))
   ;
 #delimit cr
 
-graph export "/Users/hausfath/Desktop/Climate Science/GHCN Monthly/CONUS daily records.png", replace width(3000)
+graph export "/Users/hausfath/Desktop/Climate Science/daily_records/US daily records.png", replace width(3000)
 
 gen ratio = max / (min*-1)
 
@@ -46,10 +44,10 @@ twoway (bar ratio year, color(black) lwidth(thin))
        ,
   title("Ratio of record highs to record lows", size(large))
   ytitle("Annual ratio", size(medlarge))
-  caption("Based on Berkeley Earth CONUS gridded daily homogenized data using 272 equal area gridcells", size(small))
+  caption("Based on Berkeley Earth US gridded daily homogenized data using 340 equal area gridcells", size(small))
   xtitle("", size(vsmall))
   ylabel(, labsize(medium) gmax glcolor(black) glpattern(dot))
-  xlabel(1880(20)2020, labsize(medium))
+  xlabel(1900(20)2020, labsize(medium))
   graphregion(color(white) lcolor(ebg))
   xsize(9)
   ysize(5)
@@ -57,13 +55,13 @@ twoway (bar ratio year, color(black) lwidth(thin))
   ;
 #delimit cr
 
-graph export "/Users/hausfath/Desktop/Climate Science/GHCN Monthly/CONUS records ratio.png", replace width(3000)
-*/
+graph export "/Users/hausfath/Desktop/Climate Science/daily_records/US records ratio.png", replace width(3000)
+
 
 gen decade = int(year/10)
 collapse (sum) min max, by(decade)
 replace decade = decade * 10 + 5
-drop if decade == 2025
+drop if decade == 2025 | decade <= 1905
 
 #delimit ;
 twoway (bar max decade, color(red) lwidth(thin) barwidth(7))
@@ -71,10 +69,10 @@ twoway (bar max decade, color(red) lwidth(thin) barwidth(7))
        ,
   title("US daily maximum and minimum records per decade", size(large))
   ytitle("Records per decade", size(medlarge))
-  caption("Based on Berkeley Earth CONUS gridded daily homogenized data using 340 equal area gridcells", size(small))
+  caption("Based on Berkeley Earth US gridded daily homogenized data using 340 equal area gridcells", size(small))
   xtitle("", size(vsmall))
   ylabel(-20000 "20k" -10000 "10k" 0 "0" 10000 "10k" 20000 "20k", labsize(medium) gmax glcolor(black) glpattern(dot))
-  xlabel(1880(20)2020, labsize(medium))
+  xlabel(1900(20)2020, labsize(medium))
   graphregion(color(white) lcolor(ebg))
   xsize(9)
   ysize(5)
@@ -82,4 +80,4 @@ twoway (bar max decade, color(red) lwidth(thin) barwidth(7))
   ;
 #delimit cr
 
-graph export "/Users/hausfath/Desktop/Climate Science/GHCN Monthly/CONUS daily records lowess.png", replace width(3000)
+graph export "/Users/hausfath/Desktop/Climate Science/daily_records/US daily records decadal.png", replace width(3000)
